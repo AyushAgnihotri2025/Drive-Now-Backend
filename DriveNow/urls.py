@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/user/', include('Account.urls')),
     path('api/file/', include('FileProcessing.urls')),
+    path('api/test/', include('uploadapp.urls')),
 ]

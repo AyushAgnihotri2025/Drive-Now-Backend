@@ -15,6 +15,9 @@ from pathlib import Path
 from datetime import timedelta
 import os
 
+import json
+from google.oauth2 import service_account
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -52,6 +55,7 @@ INSTALLED_APPS = [
     'storages',
     'Account',
     'FileProcessing',
+    "uploadapp.apps.UploadappConfig"
 ]
 
 MIDDLEWARE = [
@@ -89,23 +93,23 @@ WSGI_APPLICATION = 'DriveNow.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': env('DB_NAME'),
+#         'USER': env('DB_USER'),
+#         'PASSWORD': env('DB_PASSWORD'),
+#         'HOST': env('DB_HOST'),
+#         'PORT': env('DB_PORT'),
+#     }
+# }
 
 
 # Password validation
@@ -204,21 +208,21 @@ CORS_ALLOW_HEADERS = [
     "x-file-token"
 ]
 
-# Storage Bucket
-FILE_UPLOAD_STORAGE = os.environ.get("FILE_UPLOAD_STORAGE", default="s3")
+# Storage Bucket AWS S3
+# FILE_UPLOAD_STORAGE = os.environ.get("FILE_UPLOAD_STORAGE", default="s3")
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-AWS_S3_ACCESS_KEY_ID = os.environ.get("AWS_S3_ACCESS_KEY_ID")
-AWS_S3_SECRET_ACCESS_KEY = os.environ.get("AWS_S3_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
-AWS_S3_SIGNATURE_VERSION = os.environ.get("AWS_S3_SIGNATURE_VERSION", default="s3v4")
-
-# https://docs.aws.amazon.com/AmazonS3/latest/userguide/acl-overview.html#canned-acl
-AWS_DEFAULT_ACL = os.environ.get("AWS_DEFAULT_ACL", default="private")
-
-AWS_PRESIGNED_EXPIRY = os.environ.get("AWS_PRESIGNED_EXPIRY", default=36000)
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+#
+# AWS_S3_ACCESS_KEY_ID = os.environ.get("AWS_S3_ACCESS_KEY_ID")
+# AWS_S3_SECRET_ACCESS_KEY = os.environ.get("AWS_S3_SECRET_ACCESS_KEY")
+# AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+# AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
+# AWS_S3_SIGNATURE_VERSION = os.environ.get("AWS_S3_SIGNATURE_VERSION", default="s3v4")
+#
+# # https://docs.aws.amazon.com/AmazonS3/latest/userguide/acl-overview.html#canned-acl
+# AWS_DEFAULT_ACL = os.environ.get("AWS_DEFAULT_ACL", default="private")
+#
+# AWS_PRESIGNED_EXPIRY = os.environ.get("AWS_PRESIGNED_EXPIRY", default=36000)
 
 FILE_MAX_SIZE = os.environ.get("FILE_MAX_SIZE", default=4194304000)
 
@@ -233,3 +237,36 @@ CPM = os.environ.get("CPM")
 
 # Local Variable DB
 ON_GOING_UPLOADS = {}
+# credentials_info = env.dict('GOOGLE_APPLICATION_CREDENTIALS_CONTENT', default={})
+# print("credentials_info")
+# print(credentials_info)
+# credentials_dict = json.loads(credentials_info)
+GOOGLE_APPLICATION_CREDENTIALS_CONTENT={
+    "type": env("TYPE"),
+    "project_id": env("PROJECT_ID"),
+    "private_key_id": env("PRIVATE_KEY_ID"),
+    "private_key": env.str("PRIVATE_KEY", multiline=True),
+    "client_email": env("CLIENT_EMAIL"),
+    "client_id": env("CLIENT_ID"),
+    "auth_uri": env("AUTH_URI"),
+    "token_uri": env("TOKEN_URI"),
+    "auth_provider_x509_cert_url": env("AUTH_PROVIDER_X509_CERT_URL"),
+    "client_x509_cert_url": env("CLIENT_X509_CERT_URL"),
+    "universe_domain": env("UNIVERSE_DOMAIN")
+}
+
+# Configure Google Cloud Storage
+GS_BUCKET_NAME = 'testingbucket-1'
+GS_PROJECT_ID = 'wyvate-prod'
+GS_CREDENTIALS = service_account.Credentials.fr(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
+
+# Configure django-storages to use Google Cloud Storage
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_DEFAULT_ACL = 'private'
+
+# Optional: To use a CDN, you can specify the custom domain
+GS_CUSTOM_ENDPOINT = 'https://cdn.wyvate.com'
+
+# Other settings
+MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
+MEDIA_ROOT = 'media/'

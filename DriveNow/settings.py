@@ -258,7 +258,7 @@ GOOGLE_APPLICATION_CREDENTIALS_CONTENT={
 # Configure Google Cloud Storage
 GS_BUCKET_NAME = 'testingbucket-1'
 GS_PROJECT_ID = 'wyvate-prod'
-GS_CREDENTIALS = service_account.Credentials.fr(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
+GS_CREDENTIALS = service_account.Credentials.from_service_account_info(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)
 
 # Configure django-storages to use Google Cloud Storage
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
